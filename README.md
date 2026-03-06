@@ -394,9 +394,3 @@ The platform follows best practices from financial data engineering systems:
 * Observability and SLAs
 * Scalable architecture
 * Cost-efficient analytics
-
----
-
-If you want, the **next thing I strongly recommend we do** (this will save you days later) is:
-
-👉 Design the **exact folder structure + repo structure for this project** (Airflow, dbt, Terraform, pipelines, etc.).
