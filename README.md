@@ -8,6 +8,19 @@ The system demonstrates production-grade financial data engineering practices by
 
 The platform simulates the backend infrastructure that could power financial analytics products used by active traders, quantitative analysts, and small investment firms.
 
+### Repository Structure (High-Level)
+
+finstream-market-risk-data-platform/
+
+├── infrastructure/terraform/   # Infrastructure-as-Code (GCS, BigQuery, IAM)
+├── pipelines/                  # Airflow DAG and pipeline logic
+├── dbt/                        # Analytics engineering transformations
+├── warehouse/                  # BigQuery schema definitions
+├── monitoring/                 # Pipeline health and SLA metrics
+├── dashboard/                  # Streamlit dashboard
+├── docs/                       # Architecture and design documentation
+└── tests/                      # Pipeline validation tests
+
 ---
 
 # 2. Fictional Company
