@@ -90,6 +90,10 @@ Yahoo Finance API
 Apache Airflow (Orchestration)
         │
         ▼
+Data Contract Enforcement
+(schema validation)
+        │
+        ▼
 Google Cloud Storage
    ├ Raw / Landing Layer
    └ Validated Layer
@@ -108,17 +112,17 @@ Financial Dashboard
 ─────────────────────────────
 Monitoring & Observability
 ─────────────────────────────
-• Pipeline Reliability
-• Data Freshness
-• Validation Errors
-• Query Performance
+• Pipeline reliability
+• Data freshness
+• Validation failures
+• Query performance
 
 ─────────────────────────────
 Data Catalog & Lineage
 ─────────────────────────────
 • dbt model lineage
-• dataset documentation
-• column metadata
+• metadata documentation
+• dataset ownership
 ```
 
 ![FinStream Architecture](docs/system_architecture.png)
