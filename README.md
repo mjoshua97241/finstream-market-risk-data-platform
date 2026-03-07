@@ -84,21 +84,41 @@ The system follows the **Financial Data Engineering Lifecycle (FDEL)**:
 Architecture:
 
 ```
-Market Data API (Yahoo Finance)
-        ↓
-Airflow (Hourly DAG)
-        ↓
-Raw Data Lake (GCS)
-        ↓
-Validated Data Layer
-        ↓
+Yahoo Finance API
+        │
+        ▼
+Apache Airflow (Orchestration)
+        │
+        ▼
+Google Cloud Storage
+   ├ Raw / Landing Layer
+   └ Validated Layer
+        │
+        ▼
 BigQuery Warehouse
-        ↓
-dbt Transformations
-        ↓
-Signal & Risk Analytics
-        ↓
-Streamlit Dashboard
+   ├ Staging Tables
+   └ Analytics Tables
+        ▲
+        │
+       dbt
+        │
+        ▼
+Financial Dashboard
+
+─────────────────────────────
+Monitoring & Observability
+─────────────────────────────
+• Pipeline Reliability
+• Data Freshness
+• Validation Errors
+• Query Performance
+
+─────────────────────────────
+Data Catalog & Lineage
+─────────────────────────────
+• dbt model lineage
+• dataset documentation
+• column metadata
 ```
 
 ![FinStream Architecture](docs/system_architecture.png)
