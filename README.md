@@ -6,146 +6,87 @@ FinStream is a cloud-native financial data platform designed to ingest hourly st
 
 The system demonstrates production-grade financial data engineering practices by implementing structured ingestion, data validation gates, partition-optimized warehousing, scalable signal computation, and operational monitoring.
 
-The platform simulates the backend infrastructure that could power financial analytics products used by active traders, quantitative analysts, and small investment firms.
-
-### Repository Structure (High-Level)
-
-finstream-market-risk-data-platform/
-
-├── infrastructure/terraform/   # Infrastructure-as-Code (GCS, BigQuery, IAM)
-├── pipelines/                  # Airflow DAG and pipeline logic
-├── dbt/                        # Analytics engineering transformations
-├── warehouse/                  # BigQuery schema definitions
-├── monitoring/                 # Pipeline health and SLA metrics
-├── dashboard/                  # Streamlit dashboard
-├── docs/                       # Architecture and design documentation
-└── tests/                      # Pipeline validation tests
+The platform simulates backend infrastructure that could power financial analytics products used by active traders, quantitative analysts, and small investment firms.
 
 ---
 
-# 2. Fictional Company
-
-**FinStream Capital**
-
-FinStream Capital is a fictional financial analytics startup that provides:
-
-* Market signal monitoring
-* Historical signal performance tracking
-* Portfolio risk analytics
-* Volatility regime monitoring
-
-### Target Users
-
-* Active retail traders managing $100K–$2M portfolios
-* Boutique investment firms managing $5M–$250M AUM
-* Quant-oriented traders and analysts
-* Small funds lacking internal data infrastructure
-
----
-
-# 3. Problem Statement
+# 2. Problem Statement
 
 Active traders and small investment firms often rely on fragmented tools such as brokerage dashboards, charting software, and spreadsheets to monitor market signals and portfolio exposure.
 
 These fragmented systems introduce several limitations:
 
-1. **Lack of centralized signal monitoring**
+### Lack of centralized signal monitoring
 
-   * Traders track dozens or hundreds of stocks manually.
-   * Important technical signals such as moving average crossovers, RSI extremes, and volatility spikes may be missed.
+Traders track dozens or hundreds of stocks manually. Important technical signals such as moving average crossovers, RSI extremes, and volatility spikes may be missed.
 
-2. **No historical signal performance intelligence**
+### No historical signal performance intelligence
 
-   * Most platforms generate alerts but do not track how signals historically performed.
-   * Users cannot measure win rates or average returns after signals.
+Most platforms generate alerts but do not track how signals historically performed. Users cannot measure win rates or average returns following signals.
 
-3. **Limited portfolio-level risk visibility**
+### Limited portfolio-level risk visibility
 
-   * Traders lack consolidated metrics such as rolling volatility, maximum drawdown, Sharpe ratio, or sector concentration.
+Traders lack consolidated metrics such as rolling volatility, maximum drawdown, Sharpe ratio, or sector concentration.
 
-4. **Lack of operational data reliability**
+### Lack of operational data reliability
 
-   * Many systems lack defined data freshness SLAs.
-   * Data pipelines are not monitored for reliability or validation errors.
+Many systems lack defined data freshness SLAs and monitoring for pipeline failures or validation errors.
 
-FinStream addresses these challenges by building a structured, cloud-native data platform that centralizes market data ingestion, signal computation, portfolio risk analytics, and operational data engineering monitoring.
+FinStream addresses these challenges by building a cloud-native data platform that centralizes market data ingestion, signal computation, portfolio risk analytics, and operational data engineering monitoring.
+
+---
+
+# 3. Target Users
+
+FinStream Capital is designed for:
+
+* Active retail traders managing $100K–$2M portfolios
+* Boutique investment firms managing $5M–$250M AUM
+* Quant-oriented individual traders
+* Small funds without internal data engineering teams
 
 ---
 
 # 4. Quantified Business Context
 
-Assume a small investment firm manages a $10M portfolio.
+Assume a small investment firm manages a **$10M portfolio**.
 
 If:
 
-* 30% of capital ($3M) is concentrated in a correlated sector
-* Market volatility causes a 4% short-term drawdown
+* 30% of capital ($3M) is concentrated in correlated technology stocks
+* Market volatility causes a **4% drawdown**
 
 Potential loss:
 
+```
 $3,000,000 × 4% = $120,000
+```
 
-If centralized signal monitoring identifies elevated volatility or clustered bearish signals and reduces exposure by 25%, avoided loss becomes:
+If signal monitoring and volatility analytics reduce exposure by **25%**, avoided loss becomes:
 
+```
 $750,000 × 4% = $30,000
+```
 
-This illustrates how better signal monitoring and risk analytics can improve portfolio risk management.
-
----
-
-# 5. Data Engineering KPIs
-
-To simulate a production financial data platform, FinStream defines operational SLAs.
-
-### Data Freshness
-
-Target: ≤ 10 minutes after each hourly market close
-
-### Pipeline Reliability
-
-Target: ≥ 99% Airflow DAG success rate
-
-### Validation Integrity
-
-Target: < 1% validation failure rate
-
-### End-to-End Pipeline Latency
-
-Target: < 15 minutes from ingestion to curated signal tables
-
-### Query Cost Optimization
-
-Target: ≥ 60% reduction in scanned bytes through partitioning and clustering 
-
-### Transformation Runtime
-
-Target: < 3 minutes for full dbt pipeline execution
-
-### Scalability
-
-Architecture designed to scale from 50 to 500 tickers without schema redesign.
+Centralized signal intelligence and risk monitoring can materially improve portfolio risk management.
 
 ---
 
-# 6. Financial Data Engineering Lifecycle (FDEL)
+# 5. System Architecture
 
-The system follows the Financial Data Engineering Lifecycle framework :
+The system follows the **Financial Data Engineering Lifecycle (FDEL)**:
 
 1. Ingestion
 2. Storage
 3. Transformation & Delivery
 4. Monitoring
 
----
-
-# 7. Data Pipeline Architecture
-
-## Hourly Data Flow
+Architecture:
 
 ```
-Yahoo Finance API
+Market Data API (Yahoo Finance)
         ↓
-Airflow DAG (hourly)
+Airflow (Hourly DAG)
         ↓
 Raw Data Lake (GCS)
         ↓
@@ -160,21 +101,17 @@ Signal & Risk Analytics
 Streamlit Dashboard
 ```
 
+*(Insert architecture diagram here)*
+
 ---
 
-# 8. Data Pipeline Layers
+# 6. Data Pipeline Design
 
-## Raw Layer (Landing Zone)
+The pipeline follows a **Raw → Validated → Curated** architecture.
 
-Purpose:
-Preserve immutable source data.
+### Raw Layer
 
-Characteristics:
-
-* Exact API response
-* Append-only
-* Stored in Parquet format
-* Schema-on-read 
+Stores immutable API responses.
 
 Example structure:
 
@@ -182,64 +119,51 @@ Example structure:
 gs://finstream/landing/prices/year=YYYY/month=MM/day=DD/hour=HH/
 ```
 
----
+### Validated Layer
 
-## Validated Layer
+Filters corrupted or invalid records before warehouse ingestion.
 
-Purpose:
-Filter invalid or corrupted records before warehouse ingestion.
-
-Validation checks:
+Validation checks include:
 
 * Non-null symbol
 * Valid timestamps
 * Numeric OHLC values
 * Non-negative volume
-* No duplicate (symbol, timestamp)
+* Duplicate removal
 
-Invalid records are stored in a quarantine dataset.
+### Curated Layer
+
+Analytics-ready BigQuery tables.
 
 ---
 
-## Curated Layer (Data Warehouse)
+# 7. Data Model
 
-Curated tables are analytics-ready.
-
-Key tables:
+Core warehouse tables include:
 
 ### fact_prices
 
-Clean hourly OHLCV market data.
+Hourly OHLCV stock market data.
 
-Partition:
+Partitioned by:
+
+```
 DATE(timestamp)
+```
 
-Cluster:
+Clustered by:
+
+```
 symbol
+```
 
 ---
 
-# 9. Transformation Layer (dbt)
+### fact_signals
 
-dbt models compute financial indicators and signal events.
+Generated signal events.
 
-### Indicator Computation
-
-Indicators include:
-
-* EMA (12 and 26)
-* RSI (14)
-* Bollinger Bands
-* Average True Range
-* Volume spike detection
-
----
-
-### Signal Event Table
-
-fact_signals
-
-Columns:
+Columns include:
 
 * signal_id
 * symbol
@@ -247,163 +171,214 @@ Columns:
 * signal_type
 * signal_strength
 * volatility_regime
-* volume_confirmation_flag
-
-Example signals:
-
-* EMA crossover
-* RSI overbought / oversold
-* Bollinger breakout
-* volatility spike
 
 ---
 
-# 10. Signal Performance Tracking
+### fact_signal_performance
 
-Table: fact_signal_performance
-
-Tracks:
+Tracks signal outcomes:
 
 * entry_price
 * price_after_1h
 * price_after_1d
-* price_after_3d
 * return_1d
-* return_3d
 * win_flag
 
-This allows computing historical signal win rates and average returns.
+---
+
+### mart_portfolio_risk
+
+Portfolio risk analytics:
+
+* rolling volatility
+* maximum drawdown
+* Sharpe ratio
+* sector exposure
+* signal concentration risk
 
 ---
 
-# 11. Portfolio Risk Analytics
+# 8. Data Engineering Operational KPIs
 
-Table: mart_portfolio_risk
+The system is evaluated using production-style operational metrics.
 
-Metrics include:
+### Data Freshness
 
-* Rolling 30-day volatility
-* Maximum drawdown
-* Rolling Sharpe ratio 
-* Daily returns
-* Sector exposure percentage
-* Signal concentration risk
+Target: ≤ 10 minutes lag after hourly ingestion.
 
-These metrics simulate portfolio risk monitoring capabilities.
+### Pipeline Reliability
 
----
+Target: ≥ 99% successful Airflow DAG runs.
 
-# 12. Monitoring and Observability
+### Validation Integrity
 
-## Pipeline Monitoring
+Target: < 1% validation failure rate.
 
-Airflow tracks:
+### End-to-End Latency
 
-* DAG success rate
-* Task retries
-* pipeline duration
-* failure causes
+Target: < 15 minutes from ingestion to curated signal tables.
 
----
+### Query Optimization
 
-## Data Quality Monitoring
+Target: ≥ 60% scan reduction using partitioning and clustering.
 
-Table: mart_pipeline_quality
+### Transformation Runtime
 
-Tracks:
+Target: < 3 minutes for full dbt pipeline execution.
 
-* total_records
-* invalid_records
-* duplicate_records
-* validation_failure_rate
+### Scalability
+
+Architecture supports scaling from **50 to 500 tickers** without schema redesign.
 
 ---
 
-## Data Freshness Monitoring
+# 9. Monitoring and Observability
 
-Table: mart_freshness_monitor
+FinStream implements monitoring for:
 
-Tracks:
+### Pipeline Reliability
 
-* table_name
-* max_timestamp
-* lag_minutes
-* SLA compliance
+Tracked via Airflow DAG metrics.
 
----
+### Data Quality
 
-# 13. Dashboard
+Validation failure rates stored in monitoring tables.
 
-Streamlit dashboard includes:
+### Data Freshness
 
-### Categorical Visualization
+Curated tables monitored using freshness SLA checks.
 
-Signal distribution by:
+Example monitoring tables:
 
-* signal_type
-  or
-* sector
+* mart_pipeline_quality
+* mart_freshness_monitor
 
 ---
 
-### Time Series Visualization
+# 10. Dashboard
 
-One of the following:
+The Streamlit dashboard provides two primary views.
 
-* Rolling portfolio volatility
-* Portfolio drawdown curve
-* Signal frequency over time
+### Market Signal Analytics
 
-These satisfy dashboard requirements .
+Displays:
 
----
+* Signal distribution by sector
+* Signal frequency by indicator
+* Historical signal performance
 
-# 14. Technology Stack
+### Portfolio Risk Monitoring
 
-Cloud Platform
-GCP
+Displays:
 
-Data Lake
-Google Cloud Storage
-
-Data Warehouse
-BigQuery
-
-Orchestration
-Apache Airflow
-
-Transformation
-dbt
-
-Infrastructure as Code
-Terraform
-
-Dashboard
-Streamlit
-
-Optional ML
-Scikit-learn / XGBoost
+* Rolling volatility
+* Portfolio drawdown
+* Sector exposure distribution
 
 ---
 
-# 15. Future Extensions
+# 11. Technology Stack
 
-The platform architecture is designed to support future AI capabilities such as:
+| Layer           | Technology           |
+| --------------- | -------------------- |
+| Cloud           | GCP                  |
+| Data Lake       | Google Cloud Storage |
+| Data Warehouse  | BigQuery             |
+| Orchestration   | Apache Airflow       |
+| Transformations | dbt                  |
+| Infrastructure  | Terraform            |
+| Dashboard       | Streamlit            |
+| Optional ML     | Scikit-learn         |
+
+---
+
+# 12. Repository Structure
+
+```
+finstream-market-risk-data-platform/
+
+├── infrastructure/terraform/
+├── pipelines/
+├── dbt/
+├── warehouse/
+├── monitoring/
+├── dashboard/
+├── docs/
+└── tests/
+```
+
+See `docs/architecture.md` for detailed system design.
+
+---
+
+# 13. Future Extensions
+
+This architecture supports future AI capabilities including:
 
 * AI signal interpretation
 * LLM-generated risk narratives
-* RAG-based trading assistant
+* RAG-based trading assistants
 * ML-based signal confidence scoring
 
 ---
 
-# 16. Key Engineering Principles
+# 14. Key Engineering Principles
 
-The platform follows best practices from financial data engineering systems:
+The platform follows best practices used in financial data engineering systems:
 
 * Immutable raw data storage
-* Data validation gates
+* Structured validation gates
 * Partition-optimized warehouse design
-* Observability and SLAs
-* Scalable architecture
-* Cost-efficient analytics
+* Operational monitoring and SLAs
+* Scalable modular architecture
+* Cost-efficient analytics queries
+
+---
+
+# 15. How to Run the Project
+
+### 1. Provision infrastructure
+
+```
+terraform apply
+```
+
+### 2. Start Airflow
+
+```
+docker-compose up airflow
+```
+
+### 3. Run dbt transformations
+
+```
+dbt run
+```
+
+### 4. Launch dashboard
+
+```
+streamlit run dashboard/app.py
+```
+
+---
+
+# 16. References
+
+Financial Data Engineering principles referenced from:
+
+* Financial Data Engineering Lifecycle (FDEL)
+* Financial risk metrics such as Sharpe ratio and volatility analytics
+* Data lake governance best practices
+
+---
+
+# ⭐ Project Highlights
+
+This project demonstrates:
+
+* Cloud-native financial data engineering
+* Production-style data pipeline architecture
+* Operational monitoring and SLAs
+* Market signal analytics infrastructure
+* Portfolio risk monitoring
