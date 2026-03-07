@@ -101,7 +101,7 @@ Signal & Risk Analytics
 Streamlit Dashboard
 ```
 
-*(Insert architecture diagram here)*
+![FinStream Architecture](docs/system_architecture.png)
 
 ---
 
