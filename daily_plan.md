@@ -9,9 +9,9 @@ Tasks:
 
 [] Day 1
 
-    [] Create GitHub repo
-    [] Add README skeleton
-    [] Setup project folder structure
+    [x] Create GitHub repo
+    [x] Add README skeleton
+    [x] Setup project folder structure
     [] Install Python environment
 
 [] Day 2
