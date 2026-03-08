@@ -12,7 +12,7 @@ Tasks:
     [x] Create GitHub repo
     [x] Add README skeleton
     [x] Setup project folder structure
-    [] Install Python environment
+    [x] Install Python environment
 
 [] Day 2
 
