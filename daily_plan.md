@@ -7,33 +7,33 @@ Cloud environment + repo ready.
 
 Tasks:
 
-Day 1
+[] Day 1
 
-* Create GitHub repo
-* Add README skeleton
-* Setup project folder structure
-* Install Python environment
+    [] Create GitHub repo
+    [] Add README skeleton
+    [] Setup project folder structure
+    [] Install Python environment
 
-Day 2
+[] Day 2
 
-* Setup Terraform
-* Create GCS buckets
-* Create BigQuery dataset
+    [] Setup Terraform
+    [] Create GCS buckets
+    [] Create BigQuery dataset
 
-Day 3
+[] Day 3
 
-* Setup Airflow locally (Docker)
-* Create first DAG skeleton
+    [] Setup Airflow locally (Docker)
+    [] Create first DAG skeleton
 
-Day 4
+[] Day 4
 
-* Write ingestion script for Yahoo Finance
-* Test pulling stock data
+    [] Write ingestion script for Yahoo Finance
+    [] Test pulling stock data
 
-Day 5
+[] Day 5
 
-* Write GCS upload logic
-* Store data in raw layer
+    [] Write GCS upload logic
+    [] Store data in raw layer
 
 Outcome:
 
@@ -50,25 +50,25 @@ Data Lake & Validation
 Goal:
 Implement Raw → Validated pipeline.
 
-Day 6
+[] Day 6
 
-* Implement schema validation
+    [] Implement schema validation
 
-Day 7
+[] Day 7
 
-* Implement quarantine logic
+    [] Implement quarantine logic
 
-Day 8
+[] Day 8
 
-* Write validated dataset output
+    [] Write validated dataset output
 
-Day 9
+[] Day 9
 
-* Load validated data to BigQuery
+    [] Load validated data to BigQuery
 
-Day 10
+[] Day 10
 
-* Automate pipeline in Airflow
+    [] Automate pipeline in Airflow
 
 Outcome:
 
@@ -85,21 +85,21 @@ Warehouse & dbt
 Goal:
 Analytics models.
 
-Day 11
+[] Day 11
 
-* Setup dbt project
+    [] Setup dbt project
 
-Day 12
+[] Day 12
 
-* Create staging model
+    [] Create staging model
 
 ```
 stg_prices
 ```
 
-Day 13
+[] Day 13
 
-* Compute indicators
+    [] Compute indicators
 
 ```
 EMA
@@ -107,21 +107,21 @@ RSI
 ATR
 ```
 
-Day 14
+[] Day 14
 
-* Create signal detection model
+    [] Create signal detection model
 
 ```
 fact_signals
 ```
 
-Day 15
+[] Day 15
 
-* Implement signal performance table
+    [] Implement signal performance table
 
-Day 16
+[] Day 16
 
-* Create portfolio risk mart
+    [] Create portfolio risk mart
 
 Outcome:
 
@@ -135,30 +135,30 @@ BigQuery analytics layer ready
 
 Dashboard & Monitoring
 
-Day 17
+[] Day 17
 
-* Build Streamlit dashboard skeleton
+    [] Build Streamlit dashboard skeleton
 
-Day 18
+[] Day 18
 
-* Add signal analytics chart
+    [] Add signal analytics chart
 
-Day 19
+[] Day 19
 
-* Add portfolio risk chart
+    [] Add portfolio risk chart
 
-Day 20
+[] Day 20
 
-* Create monitoring tables
+    [] Create monitoring tables
 
 ```
 mart_pipeline_quality
 mart_freshness_monitor
 ```
 
-Day 21
+[] Day 21
 
-* Build pipeline health dashboard page
+    [] Build pipeline health dashboard page
 
 ---
 
@@ -166,21 +166,21 @@ Day 21
 
 Polish & Documentation
 
-Day 22
+[] Day 22
 
-* Add dbt tests
+    [] Add dbt tests
 
-Day 23
+[] Day 23
 
-* Write architecture documentation
+    [] Write architecture documentation
 
-Day 24
+[] Day 24
 
-* Create system architecture diagram
+    [] Create system architecture diagram
 
-Day 25
+[] Day 25
 
-* Improve README
+    [] Improve README
 
 ---
 
@@ -188,25 +188,25 @@ Day 25
 
 Finalization
 
-Day 26
+[] Day 26
 
-* Performance optimization
+    [] Performance optimization
 
-Day 27
+[] Day 27
 
-* Terraform cleanup
+    [] Terraform cleanup
 
-Day 28
+[] Day 28
 
-* Testing
+    [] Testing
 
-Day 29
+[] Day 29
 
-* Record demo video
+    [] Record demo video
 
-Day 30
+[] Day 30
 
-* Submit project
+    [] Submit project
 
 ---
 
