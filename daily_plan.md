@@ -16,9 +16,9 @@ Tasks:
 
 [] Day 2
 
-    [] Setup Terraform
-    [] Create GCS buckets
-    [] Create BigQuery dataset
+    [x] Setup Terraform
+    [x] Create GCS buckets
+    [x] Create BigQuery dataset
 
 [] Day 3
 
