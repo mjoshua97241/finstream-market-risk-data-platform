@@ -148,3 +148,6 @@ docker-compose.override.yml
 
 *.bak
 *.backup
+
+airflow/secrets
+airflow/config
