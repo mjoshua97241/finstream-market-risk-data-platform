@@ -23,7 +23,7 @@ Tasks:
 [] Day 3
 
     [x] Setup Airflow locally (Docker)
-    [] Create first DAG skeleton
+    [x] Create first DAG skeleton
 
 [] Day 4
 
