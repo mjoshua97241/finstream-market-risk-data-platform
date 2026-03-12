@@ -13,11 +13,13 @@ def _():
 
 @app.cell
 def _():
+    import os
     import yfinance as yf
     import pandas as pd
     from pathlib import Path
+    from google.cloud import storage
 
-    return Path, pd, yf
+    return Path, pd, storage, yf
 
 
 @app.cell
@@ -29,7 +31,10 @@ def _(Path):
 
     OUTPUT_DIR = Path("../data/raw/market_data")
     OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
-    return OUTPUT_DIR, START_DATE, TICKERS
+
+    BUCKET_NAME = "finstream-data-lake-845671354"
+    local_file = OUTPUT_DIR / "market_data.parquet"
+    return BUCKET_NAME, OUTPUT_DIR, START_DATE, TICKERS, local_file
 
 
 @app.cell
@@ -116,7 +121,57 @@ def _(OUTPUT_DIR, pd):
 
 
 @app.cell
-def _():
+def _(storage):
+    def upload_to_gcs(
+        bucket_name: str,
+        local_file: str,
+        object_name: str
+    ):
+        """
+        Upload file to Google Cloud Storage.
+
+        Args:
+            bucket_name: GCS bucket name
+            local_file: local file path
+            object_name: path inside GCS bucket
+        """
+
+        client = storage.Client()
+        bucket = client.bucket(bucket_name)
+
+        blob = bucket.blob(object_name)
+        blob.upload_from_filename(local_file)
+
+        print(f"Uploaded {local_file} → gs://{bucket_name}/{object_name}")
+
+    return (upload_to_gcs,)
+
+
+@app.cell
+def _(Path, upload_to_gcs):
+    def upload_market_data(
+        local_path: Path,
+        bucket_name: str
+    ):
+        """
+        Upload market data parquet to raw layer
+        """
+        filename = local_path.name
+
+        object_name = f"raw/market/data/{filename}"
+
+        upload_to_gcs(
+            bucket_name=bucket_name,
+            local_file=str(local_path),
+            object_name=object_name
+        )
+
+    return (upload_market_data,)
+
+
+@app.cell
+def _(BUCKET_NAME, local_file, upload_market_data):
+    upload_market_data(local_file, BUCKET_NAME)
     return
 
 
