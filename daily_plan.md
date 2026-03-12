@@ -25,15 +25,17 @@ Tasks:
     [x] Setup Airflow locally (Docker)
     [x] Create first DAG skeleton
 
-[] Day 4
+[] Day 4: notebooks/market_data_prototype.py
 
-    [] Write ingestion script for Yahoo Finance
-    [] Test pulling stock data
+    [] Pull stock data from Yahoo Finance
+    [] Convert data to pandas DataFrame
+    [] Save data as parquet locally
 
-[] Day 5
+[] Day 5: extend notebook
 
-    [] Write GCS upload logic
-    [] Store data in raw layer
+    [] Upload parquet file to GCS
+    [] Organize path structure
+        raw/market_prices/year=YYYY/month=MM/day=DD/
 
 Outcome:
 
@@ -48,32 +50,43 @@ API → GCS Raw Layer
 Data Lake & Validation
 
 Goal:
-Implement Raw → Validated pipeline.
+Convert prototype to production pipeline.
 
-[] Day 6
+[] Day 6: Convert notebook to pipeline module.
+    Create: pipelines/ingestion/fetch_market_data.py
+
+    [] fetch_market_data()
+    [] save_parquet()
+    [] upload_to_gcs()
+
+[] Day 7: Validation Framework
 
     [] Implement schema validation
+    [] Detect missing values
+    [] Detect duplicate timestamps
 
-[] Day 7
+[] Day 8: Quarantine logic
 
-    [] Implement quarantine logic
+    [] Write invalid rows to quarantine/
+    [] Generate validation metrics
 
-[] Day 8
+[] Day 9: Validated dataset
 
-    [] Write validated dataset output
+    [] Save validated dataset
+        validated/market_prices/
 
-[] Day 9
+[] Day 10: Airflow orchestration
+    Update DAG to call pipepline functions.
 
-    [] Load validated data to BigQuery
-
-[] Day 10
-
-    [] Automate pipeline in Airflow
+    [] extract_market_data
+    [] store_raw_data
+    [] validate_market_data
+    [] load_to_bigquery
 
 Outcome:
 
 ```
-API → Raw → Validated → BigQuery
+API → Raw → Validated
 ```
 
 ---
@@ -83,23 +96,24 @@ API → Raw → Validated → BigQuery
 Warehouse & dbt
 
 Goal:
-Analytics models.
+Analytics-ready warehouse.
 
-[] Day 11
+[] Day 11: BigQuery ingestion
 
-    [] Setup dbt project
+    [] Load validated parquet to BigQuery
+        Create fact_market_prices table
+        DATE(timestamp)
+        Cluster: symbol
 
-[] Day 12
+[] Day 12: Setup dbt project
 
-    [] Create staging model
+    [] Initialize dbt project
+    [] Configure BigQuery profile
 
-```
-stg_prices
-```
 
-[] Day 13
+[] Day 13: Staging model
 
-    [] Compute indicators
+    [] stg_market_prices
 
 ```
 EMA
@@ -109,19 +123,20 @@ ATR
 
 [] Day 14
 
-    [] Create signal detection model
+    [] Indicators model
+        ```
+        EMA
+        RSI
+        ATR
+        ```
 
-```
-fact_signals
-```
+[] Day 15: Signal detection
 
-[] Day 15
+    [] Create fact_signals
 
-    [] Implement signal performance table
+[] Day 16: Portfolio risk mart
 
-[] Day 16
-
-    [] Create portfolio risk mart
+    [] Create mart_portfolio_risk
 
 Outcome:
 
@@ -135,30 +150,37 @@ BigQuery analytics layer ready
 
 Dashboard & Monitoring
 
+Goal:
+Visualization + pipeline monitoring
+
 [] Day 17
 
-    [] Build Streamlit dashboard skeleton
+    [] Build Streamlit dashboard skeleton > dashboard/app.py
 
-[] Day 18
+[] Day 18: Signal analytics visualization
 
     [] Add signal analytics chart
 
-[] Day 19
+[] Day 19: Portfolio risk visualization
 
-    [] Add portfolio risk chart
+    [] Chart: Volatility distribution
 
 [] Day 20
 
     [] Create monitoring tables
 
-```
-mart_pipeline_quality
-mart_freshness_monitor
-```
+        ```
+        mart_pipeline_quality
+        mart_freshness_monitor
+        ```
+    Metrics:
+    - data freshness
+    - row counts
+    - validation failures
 
 [] Day 21
 
-    [] Build pipeline health dashboard page
+    [] Add Streamlit page: Pipeline health
 
 ---
 
@@ -170,17 +192,39 @@ Polish & Documentation
 
     [] Add dbt tests
 
+    Example:
+    ```
+    not_null
+    unique
+    accepted_values
+    ```
+
 [] Day 23
 
     [] Write architecture documentation
+
+    Explain:
+    - pipeline design
+    - data model
+    - technology choices
 
 [] Day 24
 
     [] Create system architecture diagram
 
+    Architecture:
+    ```
+    Yahoo Finance > Airflow > GCS (Raw > Validated) > BigQuery > dbt > Streamlit
+    ```
+
 [] Day 25
 
     [] Improve README
+        Include:
+        - problem statement
+        - architecture diagram
+        - pipeline explanation
+        - dashboard screenshots
 
 ---
 
@@ -191,18 +235,27 @@ Finalization
 [] Day 26
 
     [] Performance optimization
+        Examples:
+        - partitioning
+        - clustering
+        - batch sizes
 
 [] Day 27
 
     [] Terraform cleanup
+    [] Parametrize configs
 
 [] Day 28
 
-    [] Testing
+    [] End-to-end pipeline testing
 
 [] Day 29
 
     [] Record demo video
+        Show:
+        - Airflow DAG
+        - BigQuery Tables
+        - Dashboard
 
 [] Day 30
 
@@ -215,8 +268,8 @@ Finalization
 | Phase | Focus          |
 | ----- | -------------- |
 | 1     | Infrastructure |
-| 2     | Data Lake      |
-| 3     | dbt Models     |
+| 2     | Production Pipeline      |
+| 3     | Warehouse & dbt     |
 | 4     | Dashboard      |
 | 5     | Documentation  |
 | 6     | Final polish   |
@@ -224,3 +277,5 @@ Finalization
 Total timeline: **30 days**
 
 You will finish **before April 21**.
+
+
