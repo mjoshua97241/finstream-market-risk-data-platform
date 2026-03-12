@@ -7,20 +7,20 @@ Cloud environment + repo ready.
 
 Tasks:
 
-[] Day 1
+[x] Day 1
 
     [x] Create GitHub repo
     [x] Add README skeleton
     [x] Setup project folder structure
     [x] Install Python environment
 
-[] Day 2
+[x] Day 2
 
     [x] Setup Terraform
     [x] Create GCS buckets
     [x] Create BigQuery dataset
 
-[] Day 3
+[x] Day 3
 
     [x] Setup Airflow locally (Docker)
     [x] Create first DAG skeleton
