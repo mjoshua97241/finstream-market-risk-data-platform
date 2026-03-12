@@ -33,7 +33,7 @@ Tasks:
 
 [] Day 5: extend notebook
 
-    [] Upload parquet file to GCS
+    [x] Upload parquet file to GCS
     [] Organize path structure
         raw/market_prices/year=YYYY/month=MM/day=DD/
 
