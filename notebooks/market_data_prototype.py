@@ -20,35 +20,34 @@ def _():
     from google.cloud import storage
     from datetime import datetime
 
-    return Path, datetime, pd, storage, yf
+    return Path, pd, storage, yf
 
 
 @app.cell
-def _(Path, datetime):
+def _(Path):
     # Configuration
     TICKERS = ["AAPL", "MSFT", "GOOGL", "AMZN"]
-    START_DATE = "2023-01-01"
+    START_DATE = "2026-03-10"
     INTERVAL = "1h"
 
-    OUTPUT_DIR = Path("../data/raw/market_prices")
+    OUTPUT_DIR = Path("./data/raw/market_prices")
     OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 
     BUCKET_NAME = "finstream-data-lake-845671354"
-
-    today = datetime.utcnow()
-    return BUCKET_NAME, OUTPUT_DIR, START_DATE, TICKERS
+    return BUCKET_NAME, INTERVAL, OUTPUT_DIR, START_DATE, TICKERS
 
 
 @app.cell
 def _(yf):
     # Fetch market data
-    def fetch_market_data(tickers, start_date):
+    def fetch_market_data(tickers, start_date, interval):
         """
         Pull stock data from Yahoo Finance
         """
         df = yf.download(
             tickers,
             start=start_date,
+            interval=interval,
             group_by="ticker",
             auto_adjust=True,
             threads=True
@@ -70,8 +69,8 @@ def _(pd):
 
         df = df.rename(
             columns={
-                "Date": "timestamp",
-                "Datetime": "timestamp",
+                "Date": "timestamp_utc",
+                "Datetime": "timestamp_utc",
                 "level_1": "ticker",
                 "Ticker": "ticker",
                 "Open": "open",
@@ -82,11 +81,11 @@ def _(pd):
             }
         )
 
-        df["timestamp"] = pd.to_datetime(df["timestamp"])
+        df["timestamp_utc"] = pd.to_datetime(df["timestamp_utc"], utc=True)
 
         df = df[
             [
-                "timestamp",
+                "timestamp_utc",
                 "ticker",
                 "open",
                 "high",
@@ -96,7 +95,7 @@ def _(pd):
             ]
         ]
 
-        df = df.sort_values(["timestamp", "ticker"])
+        df = df.sort_values(["timestamp_utc", "ticker"])
 
         return df
 
@@ -109,10 +108,10 @@ def _(Path):
         """
         Write parquet files partitioned by date
         """
-        df["year"] = df["timestamp"].dt.year
-        df["month"] = df["timestamp"].dt.month
-        df["day"] = df["timestamp"].dt.day
-        df["hour"] = df["timestamp"].dt.hour
+        df["year"] = df["timestamp_utc"].dt.year
+        df["month"] = df["timestamp_utc"].dt.month
+        df["day"] = df["timestamp_utc"].dt.day
+        df["hour"] = df["timestamp_utc"].dt.hour
 
         for keys, partitioned_df in df.groupby(["year", "month", "day", "hour"]):
 
@@ -146,6 +145,7 @@ def _(Path):
 
 @app.cell
 def _(
+    INTERVAL,
     OUTPUT_DIR,
     START_DATE,
     TICKERS,
@@ -155,7 +155,7 @@ def _(
 ):
     print("Fetching market data...")
 
-    raw_df = fetch_market_data(TICKERS, START_DATE)
+    raw_df = fetch_market_data(TICKERS, START_DATE, INTERVAL)
 
     print("Transforming data...")
 
@@ -171,7 +171,7 @@ def _(
 
 @app.cell
 def _(OUTPUT_DIR, pd):
-    market_df = pd.read_parquet(OUTPUT_DIR / "year=2026/month=03/day=12/part-0000.parquet")
+    market_df = pd.read_parquet(OUTPUT_DIR / "year=2026/month=03/day=10/hour=13/part-0000.parquet")
     market_df.head()
     return
 
