@@ -25,17 +25,17 @@ Tasks:
     [x] Setup Airflow locally (Docker)
     [x] Create first DAG skeleton
 
-[] Day 4: notebooks/market_data_prototype.py
+[x] Day 4: notebooks/market_data_prototype.py
 
-    [] Pull stock data from Yahoo Finance
-    [] Convert data to pandas DataFrame
-    [] Save data as parquet locally
+    [x] Pull stock data from Yahoo Finance
+    [x] Convert data to pandas DataFrame
+    [x] Save data as parquet locally
 
-[] Day 5: extend notebook
+[x] Day 5: extend notebook
 
-    [] Upload parquet file to GCS
-    [] Organize path structure
-        raw/market_prices/year=YYYY/month=MM/day=DD/
+    [x] Upload parquet file to GCS
+    [x] Organize path structure
+        raw/market_prices/year=YYYY/month=MM/day=DD/hour=HH/
 
 Outcome:
 

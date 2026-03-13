@@ -151,3 +151,9 @@ docker-compose.override.yml
 
 airflow/secrets
 airflow/config
+
+#####################################
+# Marimo
+#####################################
+
+notebooks/__marimo__
