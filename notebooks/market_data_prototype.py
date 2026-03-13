@@ -18,12 +18,13 @@ def _():
     import pandas as pd
     from pathlib import Path
     from google.cloud import storage
+    from datetime import datetime
 
-    return Path, pd, storage, yf
+    return Path, datetime, pd, storage, yf
 
 
 @app.cell
-def _(Path):
+def _(Path, datetime):
     # Configuration
     TICKERS = ["AAPL", "MSFT", "GOOGL", "AMZN"]
     START_DATE = "2023-01-01"
@@ -34,7 +35,9 @@ def _(Path):
 
     BUCKET_NAME = "finstream-data-lake-845671354"
     local_file = OUTPUT_DIR / "market_data.parquet"
-    return BUCKET_NAME, OUTPUT_DIR, START_DATE, TICKERS, local_file
+
+    today = datetime.utcnow()
+    return BUCKET_NAME, OUTPUT_DIR, START_DATE, TICKERS, local_file, today
 
 
 @app.cell
@@ -51,7 +54,7 @@ def _(yf):
             auto_adjust=True,
             threads=True
         )
-    
+
         return df
 
     return (fetch_market_data,)
@@ -71,7 +74,7 @@ def transform_data(df):
             "Date": "date"
         }
     )
-    
+
     return df
 
 
@@ -83,7 +86,7 @@ def _(OUTPUT_DIR):
         Save data locally as parquet
         """
         file_path = OUTPUT_DIR / "market_data.parquet"
-    
+
         df.to_parquet(
             path = file_path,
             engine = "pyarrow",
@@ -148,7 +151,7 @@ def _(storage):
 
 
 @app.cell
-def _(Path, upload_to_gcs):
+def _(Path, today, upload_to_gcs):
     def upload_market_data(
         local_path: Path,
         bucket_name: str
@@ -158,7 +161,13 @@ def _(Path, upload_to_gcs):
         """
         filename = local_path.name
 
-        object_name = f"raw/market/data/{filename}"
+        object_name = (
+            f"raw/market_prices/"
+            f"year={today.year}/"
+            f"month={today.month:02d}/"
+            f"day={today.day:02d}/"
+            f"market_data.parquet"
+        )
 
         upload_to_gcs(
             bucket_name=bucket_name,
