@@ -31,10 +31,10 @@ Tasks:
     [x] Convert data to pandas DataFrame
     [x] Save data as parquet locally
 
-[] Day 5: extend notebook
+[x] Day 5: extend notebook
 
     [x] Upload parquet file to GCS
-    [] Organize path structure
+    [x] Organize path structure
         raw/market_prices/year=YYYY/month=MM/day=DD/
 
 Outcome:
