@@ -106,7 +106,7 @@ def _(pd):
 def _(Path):
     def write_partitioned_parquet(df, base_dir: Path):
         """
-        Write parquet files partitioned by date
+        Write parquet files partitioned by year/month/day/hour.
         """
         df["year"] = df["timestamp_utc"].dt.year
         df["month"] = df["timestamp_utc"].dt.month
@@ -144,32 +144,6 @@ def _(Path):
 
 
 @app.cell
-def _(
-    INTERVAL,
-    OUTPUT_DIR,
-    START_DATE,
-    TICKERS,
-    fetch_market_data,
-    transform_data,
-    write_partitioned_parquet,
-):
-    print("Fetching market data...")
-
-    raw_df = fetch_market_data(TICKERS, START_DATE, INTERVAL)
-
-    print("Transforming data...")
-
-    df = transform_data(raw_df)
-
-    print("Saving parquet...")
-
-    write_partitioned_parquet(df, OUTPUT_DIR)
-
-    print("Pipeline complete!")
-    return
-
-
-@app.cell
 def _(OUTPUT_DIR, pd):
     market_df = pd.read_parquet(OUTPUT_DIR / "year=2026/month=03/day=10/hour=13/part-0000.parquet")
     market_df.head()
@@ -200,21 +174,59 @@ def _(storage):
 
         print(f"Uploaded {local_file} → gs://{bucket_name}/{object_name}")
 
-    return (upload_to_gcs,)
+    return
 
 
 @app.cell
-def _(BUCKET_NAME, OUTPUT_DIR, upload_to_gcs):
-    for file in OUTPUT_DIR.rglob("*.parquet"):
-        relative_path = file.relative_to(OUTPUT_DIR)
+def _(Path, storage):
+    def upload_directory_to_gcs(bucket_name: str, local_dir: Path):
+    
+        client = storage.Client()
+        bucket = client.bucket(bucket_name)
 
-        object_name = f"raw/market_prices/{relative_path}"
+        for file in local_dir.rglob("*.parquet"):
+            relative_path = file.relative_to(local_dir)
+    
+            object_name = f"raw/market_prices/{relative_path}"
 
-        upload_to_gcs(
-            bucket_name=BUCKET_NAME,
-            local_file=str(file),
-            object_name=object_name
-        )
+            blob = bucket.blob(str(object_name))
+
+            blob.upload_from_filename(file)
+    
+            print(f"Uploaded {file} → gs://{bucket_name}/{object_name}")
+
+    return (upload_directory_to_gcs,)
+
+
+@app.cell
+def _(
+    BUCKET_NAME,
+    INTERVAL,
+    OUTPUT_DIR,
+    START_DATE,
+    TICKERS,
+    fetch_market_data,
+    transform_data,
+    upload_directory_to_gcs,
+    write_partitioned_parquet,
+):
+    print("Fetching market data...")
+
+    raw_df = fetch_market_data(TICKERS, START_DATE, INTERVAL)
+
+    print("Transforming data...")
+
+    df = transform_data(raw_df)
+
+    print("Saving parquet...")
+
+    write_partitioned_parquet(df, OUTPUT_DIR)
+
+    print("Uploading partitions to GCS...")
+
+    upload_directory_to_gcs(BUCKET_NAME, OUTPUT_DIR)
+
+    print("Ingestion complete!")
     return
 
 
