@@ -52,12 +52,12 @@ Data Lake & Validation
 Goal:
 Convert prototype to production pipeline.
 
-[] Day 6: Convert notebook to pipeline module.
+[x] Day 6: Convert notebook to pipeline module.
     Create: pipelines/ingestion/fetch_market_data.py
 
-    [] fetch_market_data()
-    [] save_parquet()
-    [] upload_to_gcs()
+    [x] fetch_market_data()
+    [x] save_parquet()
+    [x] upload_to_gcs()
 
 [] Day 7: Validation Framework
 
