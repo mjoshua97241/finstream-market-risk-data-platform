@@ -35,7 +35,7 @@ Tasks:
 
     [x] Upload parquet file to GCS
     [x] Organize path structure
-        raw/market_prices/year=YYYY/month=MM/day=DD/
+        raw/market_prices/year=YYYY/month=MM/day=DD/hour=HH/
 
 Outcome:
 

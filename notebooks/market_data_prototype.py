@@ -30,14 +30,13 @@ def _(Path, datetime):
     START_DATE = "2023-01-01"
     INTERVAL = "1h"
 
-    OUTPUT_DIR = Path("../data/raw/market_data")
+    OUTPUT_DIR = Path("../data/raw/market_prices")
     OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 
     BUCKET_NAME = "finstream-data-lake-845671354"
-    local_file = OUTPUT_DIR / "market_data.parquet"
 
     today = datetime.utcnow()
-    return BUCKET_NAME, OUTPUT_DIR, START_DATE, TICKERS, local_file, today
+    return BUCKET_NAME, OUTPUT_DIR, START_DATE, TICKERS
 
 
 @app.cell
@@ -60,46 +59,100 @@ def _(yf):
     return (fetch_market_data,)
 
 
-@app.function
-# Convert to normalize dataframe
-def transform_data(df):
-    """
-    Convert multi-index dataframe to flat structure
-    """
-    df = df.stack(level=0).reset_index()
-
-    df = df.rename(
-        columns={
-            "level_1": "ticker",
-            "Date": "date"
-        }
-    )
-
-    return df
-
-
 @app.cell
-def _(OUTPUT_DIR):
-    # Save Parquet
-    def save_parquet(df):
+def _(pd):
+    # Convert to normalize dataframe
+    def transform_data(df):
         """
-        Save data locally as parquet
+        Convert multi-index dataframe to flat structure
         """
-        file_path = OUTPUT_DIR / "market_data.parquet"
+        df = df.stack(level=0).reset_index()
 
-        df.to_parquet(
-            path = file_path,
-            engine = "pyarrow",
-            index = False
+        df = df.rename(
+            columns={
+                "Date": "timestamp",
+                "Datetime": "timestamp",
+                "level_1": "ticker",
+                "Ticker": "ticker",
+                "Open": "open",
+                "High": "high",
+                "Low": "low",
+                "Close": "close",
+                "Volume": "volume"
+            }
         )
 
-        return(f"Saved parquet to {file_path}")
+        df["timestamp"] = pd.to_datetime(df["timestamp"])
 
-    return (save_parquet,)
+        df = df[
+            [
+                "timestamp",
+                "ticker",
+                "open",
+                "high",
+                "low",
+                "close",
+                "volume"
+            ]
+        ]
+
+        df = df.sort_values(["timestamp", "ticker"])
+
+        return df
+
+    return (transform_data,)
 
 
 @app.cell
-def _(START_DATE, TICKERS, fetch_market_data, save_parquet):
+def _(Path):
+    def write_partitioned_parquet(df, base_dir: Path):
+        """
+        Write parquet files partitioned by date
+        """
+        df["year"] = df["timestamp"].dt.year
+        df["month"] = df["timestamp"].dt.month
+        df["day"] = df["timestamp"].dt.day
+        df["hour"] = df["timestamp"].dt.hour
+
+        for keys, partitioned_df in df.groupby(["year", "month", "day", "hour"]):
+
+            year, month, day, hour = keys
+
+            partition_path = (
+                base_dir /
+                f"year={year}" /
+                f"month={month:02}" /
+                f"day={day:02}" /
+                f"hour={hour:02}"
+            )
+
+            partition_path.mkdir(parents=True, exist_ok=True)
+
+            file_path = partition_path / "part-0000.parquet"
+
+            # drop date column and save to parquet
+            partitioned_df.drop(columns=["year", "month", "day", "hour"]).to_parquet(
+                file_path,
+                engine="pyarrow",
+                compression="snappy",
+                index=False
+            )
+
+            # print
+            print(f"Saved partition: {file_path}")
+
+    return (write_partitioned_parquet,)
+
+
+@app.cell
+def _(
+    OUTPUT_DIR,
+    START_DATE,
+    TICKERS,
+    fetch_market_data,
+    transform_data,
+    write_partitioned_parquet,
+):
     print("Fetching market data...")
 
     raw_df = fetch_market_data(TICKERS, START_DATE)
@@ -110,7 +163,7 @@ def _(START_DATE, TICKERS, fetch_market_data, save_parquet):
 
     print("Saving parquet...")
 
-    save_parquet(df)
+    write_partitioned_parquet(df, OUTPUT_DIR)
 
     print("Pipeline complete!")
     return
@@ -118,7 +171,7 @@ def _(START_DATE, TICKERS, fetch_market_data, save_parquet):
 
 @app.cell
 def _(OUTPUT_DIR, pd):
-    market_df = pd.read_parquet(OUTPUT_DIR / "market_data.parquet")
+    market_df = pd.read_parquet(OUTPUT_DIR / "year=2026/month=03/day=12/part-0000.parquet")
     market_df.head()
     return
 
@@ -151,36 +204,17 @@ def _(storage):
 
 
 @app.cell
-def _(Path, today, upload_to_gcs):
-    def upload_market_data(
-        local_path: Path,
-        bucket_name: str
-    ):
-        """
-        Upload market data parquet to raw layer
-        """
-        filename = local_path.name
+def _(BUCKET_NAME, OUTPUT_DIR, upload_to_gcs):
+    for file in OUTPUT_DIR.rglob("*.parquet"):
+        relative_path = file.relative_to(OUTPUT_DIR)
 
-        object_name = (
-            f"raw/market_prices/"
-            f"year={today.year}/"
-            f"month={today.month:02d}/"
-            f"day={today.day:02d}/"
-            f"market_data.parquet"
-        )
+        object_name = f"raw/market_prices/{relative_path}"
 
         upload_to_gcs(
-            bucket_name=bucket_name,
-            local_file=str(local_path),
+            bucket_name=BUCKET_NAME,
+            local_file=str(file),
             object_name=object_name
         )
-
-    return (upload_market_data,)
-
-
-@app.cell
-def _(BUCKET_NAME, local_file, upload_market_data):
-    upload_market_data(local_file, BUCKET_NAME)
     return
 
 
