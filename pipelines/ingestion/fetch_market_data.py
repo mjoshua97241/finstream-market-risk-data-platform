@@ -1,9 +1,3 @@
-
-__generated_with = "0.20.4"
-
-# %%
-import marimo as mo
-
 # %%
 import os
 import yfinance as yf
@@ -118,10 +112,6 @@ def write_partitioned_parquet(df, base_dir: Path):
         print(f"Saved partition: {file_path}")
 
 # %%
-market_df = pd.read_parquet(OUTPUT_DIR / "year=2026/month=03/day=10/hour=13/part-0000.parquet")
-market_df.head()
-
-# %%
 def upload_to_gcs(
     bucket_name: str,
     local_file: str,
@@ -160,22 +150,3 @@ def upload_directory_to_gcs(bucket_name: str, local_dir: Path):
         blob.upload_from_filename(file)
 
         print(f"Uploaded {file} → gs://{bucket_name}/{object_name}")
-
-# %%
-print("Fetching market data...")
-
-raw_df = fetch_market_data(TICKERS, START_DATE, INTERVAL)
-
-print("Transforming data...")
-
-df = transform_data(raw_df)
-
-print("Saving parquet...")
-
-write_partitioned_parquet(df, OUTPUT_DIR)
-
-print("Uploading partitions to GCS...")
-
-upload_directory_to_gcs(BUCKET_NAME, OUTPUT_DIR)
-
-print("Ingestion complete!")
