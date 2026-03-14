@@ -59,11 +59,11 @@ Convert prototype to production pipeline.
     [x] save_parquet()
     [x] upload_to_gcs()
 
-[] Day 7: Validation Framework
+[x] Day 7: Validation Framework
 
-    [] Implement schema validation
-    [] Detect missing values
-    [] Detect duplicate timestamps
+    [x] Implement schema validation
+    [x] Detect missing values
+    [x] Detect duplicate timestamps
 
 [] Day 8: Quarantine logic
 
